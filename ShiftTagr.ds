@@ -1,0 +1,33 @@
+// ShiftTagr Zoho Deluge script (for automatically assigning the proper value (Morning/Evening/Night) into the custom-made "Shift" field, based on ticket creation time).
+//
+void ShiftTagr(int TktID)
+{
+	OrgID = #########;// Your unique Zoho tenant ID here.
+	//---
+	getTkt = zoho.desk.getRecordById(OrgID,"tickets",TktID);
+	createTime = getTkt.getJSON("createdTime").replaceAll("T"," ").replaceAll("Z","");
+	timeIL = createTime.toString("yyyy-MM-dd HH:mm:ss","Asia/Jerusalem");
+	checkHr = timeIL.getHour();
+	//---
+	if(getTkt.getJSON("cf_shift").isNull() == true)
+	{
+		if(checkHr >= 07 && checkHr < 15)
+		{
+			mornShift = {"cf":{"cf_shift":"Morning"}};
+			UpdateShiftUno = zoho.desk.update(OrgID,"tickets",TktID,mornShift);
+			info UpdateShiftUno;
+		}
+		else if(checkHr >= 15 && checkHr < 23)
+		{
+			evenShift = {"cf":{"cf_shift":"Evening"}};
+			UpdateShiftDos = zoho.desk.update(OrgID,"tickets",TktID,evenShift);
+			info UpdateShiftDos;
+		}
+		else if(checkHr == 23 || checkHr >= 00 && checkHr < 07)
+		{
+			niteShift = {"cf":{"cf_shift":"Night"}};
+			UpdateShiftTres = zoho.desk.update(OrgID,"tickets",TktID,niteShift);
+			info UpdateShiftTres;
+		}
+	}
+}
